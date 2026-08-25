@@ -1,9 +1,31 @@
 [gd_scene format=3 uid="uid://ddjpvivutahsx"]
 
-[node name="Main" type="Control" unique_id=1971124166]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[ext_resource type="Texture2D" uid="uid://bodjtunmjrnnh" path="res://Assets/Textures/SkyboxSquare.png" id="1_qplxx"]
+[ext_resource type="PackedScene" uid="uid://cdk6hwb4hi2wc" path="res://Assets/Scenes/player.tscn" id="2_elf4b"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_y4xbc"]
+panorama = ExtResource("1_qplxx")
+filter = false
+
+[sub_resource type="Sky" id="Sky_cdlkh"]
+sky_material = SubResource("PanoramaSkyMaterial_y4xbc")
+
+[sub_resource type="Environment" id="Environment_bmsjo"]
+background_mode = 2
+sky = SubResource("Sky_cdlkh")
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+
+[node name="Main" type="Node3D" unique_id=2094594552]
+
+[node name="Level Environment" type="Node3D" parent="." unique_id=1631774157]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Level Environment" unique_id=1448641966]
+environment = SubResource("Environment_bmsjo")
+
+[node name="Player" parent="Level Environment" unique_id=1061474000 instance=ExtResource("2_elf4b")]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Level Environment" unique_id=314377732]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(100, 1, 100)
