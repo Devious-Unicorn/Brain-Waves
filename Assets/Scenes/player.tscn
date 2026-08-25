@@ -1,19 +1,71 @@
 [gd_scene format=3 uid="uid://cdk6hwb4hi2wc"]
 
 [ext_resource type="Script" uid="uid://b0c02p6ckmpdq" path="res://Assets/Scripts/player.gd" id="1_2f8j2"]
+[ext_resource type="Texture2D" uid="uid://bjqo4qpcqfye1" path="res://Assets/Textures/Crosshair.png" id="2_7dd06"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3rsb5"]
 radius = 0.3
 height = 1.8
 
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7dd06"]
+radius = 0.3
+height = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cdlkh"]
+shading_mode = 0
+albedo_color = Color(1, 0.84313726, 0, 1)
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_bmsjo"]
+material = SubResource("StandardMaterial3D_cdlkh")
+size = Vector2(0.1, 0.1)
+orientation = 2
+
+[sub_resource type="Curve" id="Curve_dagj7"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [node name="Player" type="CharacterBody3D" unique_id=1061474000]
 script = ExtResource("1_2f8j2")
 
-[node name="CShape" type="CollisionShape3D" parent="." unique_id=1873066399]
+[node name="StandingCollider" type="CollisionShape3D" parent="." unique_id=1873066399]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_3rsb5")
+debug_color = Color(0.141176, 0.427451, 0.92549, 0.784314)
+
+[node name="SlidingCollider" type="CollisionShape3D" parent="." unique_id=1119150890]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("CapsuleShape3D_7dd06")
+disabled = true
 debug_color = Color(0.141176, 0.427451, 0.92549, 0.784314)
 
 [node name="Camera" type="Camera3D" parent="." unique_id=1494834]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
 fov = 80.0
+
+[node name="dashTimer" type="Timer" parent="." unique_id=1737190944]
+wait_time = 0.2
+one_shot = true
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=255699059]
+
+[node name="crosshair" type="Sprite2D" parent="HUD" unique_id=779956588]
+position = Vector2(960, 540)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_7dd06")
+
+[node name="SlideSparks" type="CPUParticles3D" parent="." unique_id=58828976]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.75)
+amount = 32
+lifetime = 0.4
+explosiveness = 0.1
+local_coords = true
+mesh = SubResource("PlaneMesh_bmsjo")
+direction = Vector3(0, 0.5, -1)
+spread = 50.0
+initial_velocity_min = 15.0
+initial_velocity_max = 25.0
+scale_amount_curve = SubResource("Curve_dagj7")
