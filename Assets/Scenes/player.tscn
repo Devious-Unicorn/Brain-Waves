@@ -43,7 +43,7 @@ disabled = true
 debug_color = Color(0.141176, 0.427451, 0.92549, 0.784314)
 
 [node name="Camera" type="Camera3D" parent="." unique_id=1494834]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 fov = 80.0
 
 [node name="dashTimer" type="Timer" parent="." unique_id=1737190944]
@@ -59,13 +59,14 @@ texture = ExtResource("2_7dd06")
 
 [node name="SlideSparks" type="CPUParticles3D" parent="." unique_id=58828976]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.75)
-amount = 32
+emitting = false
+amount = 64
 lifetime = 0.4
 explosiveness = 0.1
 local_coords = true
 mesh = SubResource("PlaneMesh_bmsjo")
 direction = Vector3(0, 0.5, -1)
-spread = 50.0
+spread = 60.0
 initial_velocity_min = 15.0
 initial_velocity_max = 25.0
 scale_amount_curve = SubResource("Curve_dagj7")
