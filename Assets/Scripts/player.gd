@@ -7,6 +7,7 @@ class_name Player extends CharacterBody3D
 @export var slideSpeed: float = 24
 ## The speed the character moves when doing a dash
 @export var dashSpeed: float = 49.5
+@export var slideJumpSpeedMult: float = 2
 ## how hard the player can strafe laterally while sliding
 @export var slideStrafeForce: float = 3.0
 ## The strength of gravity
@@ -25,9 +26,10 @@ var walk_vel: Vector3 # Walking velocity
 var grav_vel: Vector3 # Gravity velocity 
 var jump_vel: Vector3 # Jumping velocity
 
-var canDash: bool = true
 var isDashing: bool = false
 var dashLockDir: Vector3 = Vector3.ZERO
+## how many frames the user has been sliding for
+var slideTime: int = 0
 
 @onready var camera: Camera3D = $Camera
 
@@ -38,8 +40,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		look_dir = event.relative * 0.001
 		if mouse_captured: _rotate_camera()
-	if event.is_action_released("dash") and not isDashing:
-		canDash = true
 
 func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed(&"jump"): jumping = true
@@ -63,8 +63,8 @@ func _walk(delta: float) -> Vector3:
 	var _forward: Vector3 = camera.global_transform.basis * Vector3(move_dir.x, 0, move_dir.y)
 	var walk_dir: Vector3 = Vector3(_forward.x, 0, _forward.z).normalized()
 	
-	if Input.is_action_just_pressed("dash") and canDash and not Input.is_action_pressed("slide"):
-		startDash(walk_dir) # Pass the camera-relative direction into the dash logic
+	if Input.is_action_just_pressed("dash") and not Input.is_action_pressed("slide") and not isDashing:
+		startDash(walk_dir) # Instantly starts a new dash
 	
 	var cam_forward = -camera.global_transform.basis.z
 	if isDashing:
@@ -79,10 +79,14 @@ func _walk(delta: float) -> Vector3:
 	else:
 		# move at walking speed if not sliding or dashing
 		if not Input.is_action_pressed("slide"):
+			slideTime = 0
 			walk_vel = walk_dir * walkSpeed * move_dir.length()
 			slideVFX(false)
 		if Input.is_action_pressed("slide"):
+			if slideTime <= 3:
+				walk_vel *= slideJumpSpeedMult
 			handleSlide(walk_dir, cam_forward)
+			slideTime += 1
 	
 	return walk_vel
 
@@ -111,20 +115,22 @@ func slideVFX(enabled: bool, move_direction: Vector3 = Vector3.ZERO):
 		$StandingCollider.disabled = true
 		$SlidingCollider.disabled = false
 		camera.position.y = 1.7 - 0.9
-		
-		# 1. DO NOT FLIP. Go FORWARD with the player's slide vector
-		var spark_dir = move_direction 
+		if is_on_floor():
+			# 1. DO NOT FLIP. Go FORWARD with the player's slide vector
+			var spark_dir = move_direction 
 
-		# 2. Angle them upwards so they spray into your view matrix
-		spark_dir.y = 0.25
-		spark_dir = spark_dir.normalized()
+			# 2. Angle them upwards so they spray into your view matrix
+			spark_dir.y = 0.25
+			spark_dir = spark_dir.normalized()
 
-		# 3. Un-bypass the player's rotation: transform the world direction 
-		# vector back into the particle node's local coordinate system.
-		$SlideSparks.direction = $SlideSparks.global_transform.basis.inverse() * spark_dir
-
-		# 4. Ignite the sparks
-		$SlideSparks.emitting = true
+			# 3. Un-bypass the player's rotation: transform the world direction 
+			# vector back into the particle node's local coordinate system.
+			$SlideSparks.direction = $SlideSparks.global_transform.basis.inverse() * spark_dir
+			
+			# 4. Ignite the sparks
+			$SlideSparks.emitting = true
+		else:
+			$SlideSparks.emitting = false
 
 	else:
 		$StandingCollider.disabled = false
@@ -134,7 +140,6 @@ func slideVFX(enabled: bool, move_direction: Vector3 = Vector3.ZERO):
 
 func startDash(initial_dir: Vector3):
 	isDashing = true
-	canDash = false
 	dashLockDir = initial_dir # Freeze the movement vector
 	$dashTimer.start()
 	
