@@ -1,4 +1,5 @@
-class_name Player extends CharacterBody3D
+class_name Player
+extends CharacterBody3D
 
 # One meter here equals one unit in ULTRAKILL
 ## The speed the character moves when walking normally
@@ -11,7 +12,7 @@ class_name Player extends CharacterBody3D
 ## how hard the player can strafe laterally while sliding
 @export var slideStrafeForce: float = 3.0
 ## The strength of gravity
-@export var gravity: float = 9.8 # m/s^2
+var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 ## The height the character jumps to
 @export var jump_height: float = 1 # m
 @export var camera_sens: float = 1
@@ -30,6 +31,7 @@ var isDashing: bool = false
 var dashLockDir: Vector3 = Vector3.ZERO
 ## how many frames the user has been sliding for
 var slideTime: int = 0
+var slamming: bool = false
 
 @onready var camera: Camera3D = $Camera
 
@@ -76,17 +78,23 @@ func _walk(delta: float) -> Vector3:
 		else:
 			var flat_forward = Vector3(cam_forward.x, 0, cam_forward.z).normalized()
 			walk_vel = flat_forward * dashSpeed
-	else:
+	elif not slamming:
 		# move at walking speed if not sliding or dashing
-		if not Input.is_action_pressed("slide"):
+		if not Input.is_action_pressed("slide") and not slamming:
 			slideTime = 0
 			walk_vel = walk_dir * walkSpeed * move_dir.length()
 			slideVFX(false)
-		if Input.is_action_pressed("slide"):
-			if slideTime <= 3:
+		elif Input.is_action_pressed("slide") and is_on_floor() and not slamming:
+			if slideTime <= 3: 
 				walk_vel *= slideJumpSpeedMult
 			handleSlide(walk_dir, cam_forward)
 			slideTime += 1
+		elif Input.is_action_just_pressed("slide") and not is_on_floor(): slamming = true
+	
+	if slamming:
+		walk_vel = Vector3.ZERO
+		walk_vel.y = -100
+		if is_on_floor(): slamming = false
 	
 	return walk_vel
 
@@ -116,22 +124,14 @@ func slideVFX(enabled: bool, move_direction: Vector3 = Vector3.ZERO):
 		$SlidingCollider.disabled = false
 		camera.position.y = 1.7 - 0.9
 		if is_on_floor():
-			# 1. DO NOT FLIP. Go FORWARD with the player's slide vector
 			var spark_dir = move_direction 
-
-			# 2. Angle them upwards so they spray into your view matrix
 			spark_dir.y = 0.25
 			spark_dir = spark_dir.normalized()
-
-			# 3. Un-bypass the player's rotation: transform the world direction 
-			# vector back into the particle node's local coordinate system.
-			$SlideSparks.direction = $SlideSparks.global_transform.basis.inverse() * spark_dir
 			
-			# 4. Ignite the sparks
+			$SlideSparks.direction = $SlideSparks.global_transform.basis.inverse() * spark_dir
 			$SlideSparks.emitting = true
 		else:
 			$SlideSparks.emitting = false
-
 	else:
 		$StandingCollider.disabled = false
 		$SlidingCollider.disabled = true
