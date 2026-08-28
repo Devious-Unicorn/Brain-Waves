@@ -22,7 +22,6 @@ ambient_light_color = Color(1, 1, 1, 1)
 [node name="Level Environment" type="Node3D" parent="." unique_id=1631774157]
 
 [node name="Player" parent="Level Environment" unique_id=1061474000 instance=ExtResource("2_elf4b")]
-gravity = 25.0
 jump_height = 5.0
 
 [node name="testLevel" type="Node3D" parent="Level Environment" unique_id=1953642886]
