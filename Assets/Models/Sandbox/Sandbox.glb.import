@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://mlgc0mkymj3a"
-path="res://.godot/imported/Sandbox.glb-09af8a1f17a05e11d67ab047a9723000.scn"
+path="res://.godot/imported/Sandbox.glb-6e195f18cc0bc7da113e9ae001024aeb.scn"
 
 [deps]
 
-source_file="res://Assets/Models/Sandbox.glb"
-dest_files=["res://.godot/imported/Sandbox.glb-09af8a1f17a05e11d67ab047a9723000.scn"]
+source_file="res://Assets/Models/Sandbox/Sandbox.glb"
+dest_files=["res://.godot/imported/Sandbox.glb-6e195f18cc0bc7da113e9ae001024aeb.scn"]
 
 [params]
 

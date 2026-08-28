@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cf57bbsvq12xq"
-path.s3tc="res://.godot/imported/Sandbox_tempFloor.png-551cfa63447e92a38b4502dfe57eaa71.s3tc.ctex"
+path.s3tc="res://.godot/imported/Sandbox_tempFloor.png-b16b5d68c7786d9d575ac0c41faa2c14.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://Assets/Models/Sandbox_tempFloor.png"
-dest_files=["res://.godot/imported/Sandbox_tempFloor.png-551cfa63447e92a38b4502dfe57eaa71.s3tc.ctex"]
+source_file="res://Assets/Models/Sandbox/Sandbox_tempFloor.png"
+dest_files=["res://.godot/imported/Sandbox_tempFloor.png-b16b5d68c7786d9d575ac0c41faa2c14.s3tc.ctex"]
 
 [params]
 
