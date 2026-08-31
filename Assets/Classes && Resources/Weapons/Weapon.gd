@@ -22,6 +22,12 @@ enum projectileType {
 ## If this weapon can deal damage to the player.
 @export var friendlyFire: bool
 
+## How long the weapon takes to cooldown before firing again.
+@export var cooldownTime: float
+
+## How long the weapon takes to charge, in seconds.
+@export var chargeTime: float
+
 ## If the projectile created by this weapon ricochets.
 @export_group("Ricochets") 
 @export_custom(PROPERTY_HINT_GROUP_ENABLE, "enableRicochets")
@@ -42,20 +48,16 @@ var enableExplosive: bool
 @export var explosiveDamage: float
 ## Radius, in meters, of the explosion created when the explosive fired by this weapon detonates.
 @export var explosionSize: float
+## Possible targets to explode on.
+enum explosionTargets {
+	LEVEL = 1,
+	ENEMIES = 2,
+	PLAYER = 4
+}
+## The world objects that projectiles created by this weapon will explode on if they collide with.
+@export_flags("Level:1", "Enemies:2", "Player:4") var explosionTarget: int
 ## Whether or not the explosive fired by this weapon creates fire when detonating.
 @export var ignitesFire: bool
-
-@export_group("Cooldown") 
-## Whether or not the weapon has a cooldown.
-@export_custom(PROPERTY_HINT_GROUP_ENABLE, "enableCooldown") var enableCooldown: bool = false 
-## How long the weapon takes to cooldown before firing again.
-@export var cooldownTime: float
-
-@export_group("Charge time") 
-## Whether or not the weapon takes time to charge before firing.
-@export_custom(PROPERTY_HINT_GROUP_ENABLE, "enableCharge") var enableCharge: bool = false 
-## How long the weapon takes to charge, in seconds.
-@export var chargeTime: float
 
 @export_group("Hitscan properties") 
 ## The damage this weapon deals if it's hitscan hits an enemy.
