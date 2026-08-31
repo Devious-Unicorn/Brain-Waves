@@ -8,6 +8,9 @@ var health: float
 @export var moveSpeed: float
 @export var jumpHeight: float
 
+## Whether or not this enemy can be damaged
+@export var vulnerable: bool = true
+
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var gravityVelocity: Vector3
 var jumpVelocity: Vector3
@@ -16,17 +19,18 @@ var jumping: bool
 ## Accessed to modify an enemie's health. [br]
 ## negative values will heal the enemy
 func hurt(dmg: float) -> void:
-	health -= dmg
-	health = clamp(health, 0, maxHealth)
+	if vulnerable:
+		health -= dmg
+		health = clamp(health, 0, maxHealth)
+	if health == 0:
+		die()
 
 ## Handles the force of gravity on the enemy's velocity[br]
-## Should not be overridden
 func _gravity(delta: float) -> Vector3:
 	gravityVelocity = Vector3.ZERO if is_on_floor() else gravityVelocity.move_toward(Vector3(0, velocity.y - gravity, 0), gravity * delta)
 	return gravityVelocity
 
 ## Handles a jump force's effect of the enemy's velocity[br]
-## Should not be overridden
 func _jump(delta: float) -> Vector3:
 	if jumping:
 		if is_on_floor(): jumpVelocity = Vector3(0, sqrt(4 * jumpHeight * gravity), 0)
@@ -36,7 +40,6 @@ func _jump(delta: float) -> Vector3:
 	return jumpVelocity
 
 ## Handles calculating the enemy's vinal velocity for the frame[br]
-## Should not be overridden
 func _handleFinalVelocity(delta: float) -> void:
 	velocity = pathfind() + _gravity(delta) + _jump(delta)
 
