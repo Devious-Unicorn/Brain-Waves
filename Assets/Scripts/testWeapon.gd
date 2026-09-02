@@ -1,2 +1,2 @@
 @tool
-extends Weapon
+extends Pistol

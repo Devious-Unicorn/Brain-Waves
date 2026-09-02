@@ -3,7 +3,6 @@
 [ext_resource type="PackedScene" uid="uid://cdk6hwb4hi2wc" path="res://Assets/Scenes/player.tscn" id="1_elf4b"]
 [ext_resource type="Texture2D" uid="uid://bodjtunmjrnnh" path="res://Assets/Textures/SkyboxSquare.png" id="2_guoxd"]
 [ext_resource type="PackedScene" uid="uid://bobq3uq60bqfc" path="res://Assets/Scenes/sandbox.tscn" id="3_rvsrt"]
-[ext_resource type="Script" uid="uid://co8ht2y41t4a" path="res://Assets/Scripts/testWeapon.gd" id="4_guoxd"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_y4xbc"]
 panorama = ExtResource("2_guoxd")
@@ -23,7 +22,7 @@ ambient_light_color = Color(1, 1, 1, 1)
 [node name="Level Environment" type="Node3D" parent="." unique_id=1631774157]
 
 [node name="Player" parent="Level Environment" unique_id=1061474000 instance=ExtResource("1_elf4b")]
-jump_height = 5.0
+jump_height = 7.5
 
 [node name="testLevel" type="Node3D" parent="Level Environment" unique_id=1953642886]
 
@@ -31,6 +30,3 @@ jump_height = 5.0
 environment = SubResource("Environment_bmsjo")
 
 [node name="Sandbox" parent="Level Environment/testLevel" unique_id=1368824330 instance=ExtResource("3_rvsrt")]
-
-[node name="Node3D" type="Node3D" parent="Level Environment/testLevel" unique_id=1797142480]
-script = ExtResource("4_guoxd")
