@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b0c02p6ckmpdq" path="res://Assets/Scripts/player.gd" id="1_2f8j2"]
 [ext_resource type="Texture2D" uid="uid://bjqo4qpcqfye1" path="res://Assets/Textures/Crosshair.png" id="2_7dd06"]
+[ext_resource type="Shader" uid="uid://crdxay4s5830k" path="res://Assets/Shaders/Hurt VFX.gdshader" id="3_38rej"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3rsb5"]
 radius = 0.3
@@ -10,6 +11,11 @@ height = 1.8
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7dd06"]
 radius = 0.3
 height = 0.9
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bmsjo"]
+shader = ExtResource("3_38rej")
+shader_parameter/a = 3.0
+shader_parameter/c = -0.5
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cdlkh"]
 shading_mode = 0
@@ -25,6 +31,23 @@ size = Vector2(0.1, 0.1)
 orientation = 2
 
 [sub_resource type="Curve" id="Curve_dagj7"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_38rej"]
+shading_mode = 0
+albedo_color = Color(1, 0, 0, 1)
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_t1xgp"]
+material = SubResource("StandardMaterial3D_38rej")
+size = Vector2(0.1, 0.1)
+orientation = 2
+
+[sub_resource type="Curve" id="Curve_38rej"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 point_count = 2
 
@@ -57,6 +80,19 @@ position = Vector2(960, 540)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_7dd06")
 
+[node name="Hurt VFX" type="Panel" parent="HUD" unique_id=1385393213]
+visible = false
+material = SubResource("ShaderMaterial_bmsjo")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="HUD" unique_id=1677284262]
+offset_right = 40.0
+offset_bottom = 23.0
+
 [node name="SlideSparks" type="CPUParticles3D" parent="." unique_id=58828976]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.75)
 emitting = false
@@ -70,3 +106,20 @@ spread = 60.0
 initial_velocity_min = 15.0
 initial_velocity_max = 25.0
 scale_amount_curve = SubResource("Curve_dagj7")
+
+[node name="hurtTimer" type="Timer" parent="." unique_id=1835180923]
+wait_time = 0.1
+one_shot = true
+
+[node name="Blood Particles" type="CPUParticles3D" parent="." unique_id=1403999942]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+emitting = false
+amount = 32
+lifetime = 0.5
+one_shot = true
+mesh = SubResource("PlaneMesh_t1xgp")
+direction = Vector3(0, 1, 0)
+spread = 180.0
+initial_velocity_min = 5.0
+initial_velocity_max = 10.0
+scale_amount_curve = SubResource("Curve_38rej")

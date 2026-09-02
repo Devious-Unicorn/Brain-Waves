@@ -3,6 +3,8 @@
 class_name Weapon 
 extends Node3D
 
+@export var player: Player
+
 enum projectileType {
 	## When fired a hitscan will hit whatever the player's crosshair is on in one frame with no bullet drop
 	HITSCAN, 
@@ -28,6 +30,12 @@ enum projectileType {
 ## How long the weapon takes to charge, in seconds.
 @export var chargeTime: float
 
+## How long the weapon takes to cooldown before firing again if using the alt-fire
+@export var altCooldownTime: float
+
+## How long the weapon takes to charge, in seconds if using the alt-fire
+@export var altChargeTime: float
+
 ## If the projectile created by this weapon ricochets.
 @export_group("Ricochets") 
 @export_custom(PROPERTY_HINT_GROUP_ENABLE, "enableRicochets")
@@ -40,6 +48,16 @@ enum ricochetTargets {
 }
 ## The world objects that projectiles created by this weapon will ricochet off of.
 @export_flags("Level:1", "Enemies:2", "Player:4") var ricochetTarget: int
+
+@export_group("Damage")
+## Damage dealt on hitting an enemy
+@export var damage: float
+## Damage dealt on hitting an enemy's limb
+@export var limbshotDamage: float
+## Damage dealt on hitting an enemy's head
+@export var headshotDamage: float
+## How much the damage is multiplied by by doing an alt-fire shot
+@export var altfireMult: float
 
 @export_group("Explosive")
 @export_custom(PROPERTY_HINT_GROUP_ENABLE, "enableExplosive")
@@ -59,10 +77,6 @@ enum explosionTargets {
 ## Whether or not the explosive fired by this weapon creates fire when detonating.
 @export var ignitesFire: bool
 
-@export_group("Hitscan properties") 
-## The damage this weapon deals if it's hitscan hits an enemy.
-@export var hitscanDamage: float
-
 @export_group("Pellet Burst properties")
 ## Damage dealt if pellets fired by this weapon hits an enemy.
 @export var pelletDamage: float
@@ -71,38 +85,28 @@ enum explosionTargets {
 @export var pelletSpread: float
 @export var numPellets: int
 
-@export_group("Bullet properties")
-## Damage that bullets fired by this weapon deal.
-@export var bulletDamage: float
-
 ## Handles showing and hiding attributes for each projectile type depending on which type is chosen
 func _validate_property(property: Dictionary) -> void:
-	# 1. Hitscan Group & variables (Using exact code camelCase)
-	if property.name in ["Hitscan properties", "hitscanDamage"]:
-		if projectile_type != projectileType.HITSCAN:
-			property.usage &= ~PROPERTY_USAGE_EDITOR # Safely removes from editor view
-	# 2. Pellet Burst Group & variables
-	elif property.name in ["Pellet Burst properties", "pelletDamage", "pelletSpread", "numPellets"]:
+	if property.name in ["Pellet Burst properties", "pelletDamage", "pelletSpread", "numPellets"]:
 		if projectile_type != projectileType.PELLET_BURST:
 			property.usage &= ~PROPERTY_USAGE_EDITOR
 	# 3. Bullet Group & variables
-	elif property.name in ["Bullet properties", "bulletDamage"]:
-		if projectile_type != projectileType.BULLET:
-			property.usage &= ~PROPERTY_USAGE_EDITOR
 
-## Handles logic for each projectile type[br]
-## Can be overridden for special behavior
-func fire(facingDir: Vector3) -> void:
-	match projectile_type:
-		projectileType.HITSCAN:
-			handleHitscan(facingDir)
-		projectileType.PELLET_BURST:
-			handlePelletBurst()
-		projectileType.BULLET:
-			handleBullet()
+## Handles logic for when the player fires the weapon
+@abstract
+func fire() -> void
 
-func handleHitscan(facingDir: Vector3) -> void:
-	pass
+## Handles logic for when the player uses the alt fire of a weaopn
+@abstract
+func altFire() -> void
+
+func handleHitscan() -> void:
+	var forward = player.cam_forward
+	var physicsState = player.get_world_3d().direct_space_state
+	var ray = PhysicsRayQueryParameters3D.create(player.camera.position, forward * 1000)
+	var intersection = physicsState.intersect_ray(ray)
+	if intersection:
+		var hitscan = Hitscan.new()
 
 func handlePelletBurst() -> void:
 	pass

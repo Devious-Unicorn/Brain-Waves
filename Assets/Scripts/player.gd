@@ -17,11 +17,17 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 @export var jump_height: float = 1 # m
 @export var camera_sens: float = 1
 
+@export var maxHealth: float = 100
+var health: float = 100
+
+@export var weapon: Weapon
+
 var jumping: bool = false
 var mouse_captured: bool = false
 
 var move_dir: Vector2 # Input direction for movement
 var look_dir: Vector2 # Input direction for look/aim
+var cam_forward: Vector3
 
 var walk_vel: Vector3 # Walking velocity 
 var grav_vel: Vector3 # Gravity velocity 
@@ -32,20 +38,34 @@ var dashLockDir: Vector3 = Vector3.ZERO
 ## how many frames the user has been sliding for
 var slideTime: int = 0
 var slamming: bool = false
+## Whether or not the player has a double health power up
+var healthBoost: bool = false
+## Whether or not the player can take damage
+var vulnerable: bool = true
 
 @onready var camera: Camera3D = $Camera
 
 func _ready() -> void:
 	capture_mouse()
+	health = maxHealth
+	weapon = Pistol.new(self, 1, 1.5, 2, 1)
+	add_child(weapon)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		look_dir = event.relative * 0.001
 		if mouse_captured: _rotate_camera()
+	if Input.is_action_pressed("fire"):
+		if weapon:
+			weapon.fire()
+	if Input.is_action_pressed("alt-fire"):
+		if weapon:
+			weapon.altFire()
 
 func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed(&"jump"): jumping = true
 	velocity = _walk(delta) + _gravity(delta) + _jump(delta)
+	$HUD/Label.text = str(velocity.length())
 	move_and_slide()
 
 func capture_mouse() -> void:
@@ -68,7 +88,7 @@ func _walk(delta: float) -> Vector3:
 	if Input.is_action_just_pressed("dash") and not Input.is_action_pressed("slide") and not isDashing:
 		startDash(walk_dir) # Instantly starts a new dash
 	
-	var cam_forward = -camera.global_transform.basis.z
+	cam_forward = -camera.global_transform.basis.z
 	if isDashing:
 		# Lock vertical movement during the active frames
 		velocity.y = 0 
@@ -80,16 +100,16 @@ func _walk(delta: float) -> Vector3:
 			walk_vel = flat_forward * dashSpeed
 	elif not slamming:
 		# move at walking speed if not sliding or dashing
-		if not Input.is_action_pressed("slide") and not slamming:
+		if not Input.is_action_pressed("slide"):
 			slideTime = 0
 			walk_vel = walk_dir * walkSpeed * move_dir.length()
 			slideVFX(false)
-		elif Input.is_action_pressed("slide") and is_on_floor() and not slamming:
+		elif Input.is_action_just_pressed("slide") and not is_on_floor(): slamming = true
+		elif Input.is_action_pressed("slide"):
+			handleSlide(walk_dir)
 			if slideTime <= 3: 
 				walk_vel *= slideJumpSpeedMult
-			handleSlide(walk_dir, cam_forward)
 			slideTime += 1
-		elif Input.is_action_just_pressed("slide") and not is_on_floor(): slamming = true
 	
 	if slamming:
 		walk_vel = Vector3.ZERO
@@ -98,7 +118,7 @@ func _walk(delta: float) -> Vector3:
 	
 	return walk_vel
 
-func handleSlide(walk_dir: Vector3, cam_forward: Vector3):
+func handleSlide(walk_dir: Vector3):
 	if Input.is_action_just_pressed("slide"):
 		# Lock the initial movement direction (or forward if standing still)
 		dashLockDir = walk_dir if walk_dir != Vector3.ZERO else cam_forward
@@ -157,3 +177,20 @@ func _jump(delta: float) -> Vector3:
 		return jump_vel
 	jump_vel = Vector3.ZERO if is_on_floor() or is_on_ceiling_only() else jump_vel.move_toward(Vector3.ZERO, gravity * delta)
 	return jump_vel
+
+func _die():
+	pass
+
+func _hurt(dmg: float):
+	health -= dmg
+	health = clamp(health, 0, maxHealth * 2 if healthBoost else maxHealth) # allow double health if the player has a double health powerup
+	if dmg < 0:
+		hurtVFX()
+	if health <= 0: _die()
+
+func hurtVFX():
+	$"HUD/Hurt VFX".show()
+	$"Blood Particles".emitting = true
+	$hurtTimer.start()
+	await  $hurtTimer.timeout()
+	$"HUD/Hurt VFX".hide()
